@@ -33,6 +33,7 @@
 #include <sys/stat.h>
 #include <stdarg.h>
 #include <sys/types.h>
+#include <sys/endian.h>
 
 #include "su.h"
 #include "utils.h"
@@ -76,7 +77,7 @@ int fork_zero_fucks() {
         return pid;
     }
     else {
-        if (pid = fork())
+        if ((pid = fork()))
             exit(0);
         return 0;
     }
@@ -367,7 +368,7 @@ static int socket_accept(int serv_fd) {
 static int socket_send_request(int fd, const struct su_context *ctx) {
 #define write_data(fd, data, data_len)              \
 do {                                                \
-    size_t __len = htonl(data_len);                 \
+    uint32_t __len = htonl(data_len);               \
     __len = write((fd), &__len, sizeof(__len));     \
     if (__len != sizeof(__len)) {                   \
         PLOGE("write(" #data ")");                  \
@@ -569,12 +570,12 @@ int access_disabled(const struct su_initiator *from) {
         if (data != NULL) {
             len = strlen(data);
             if (len >= PROPERTY_VALUE_MAX)
-                memcpy(enabled, "1", 2);
+                memcpy(enabled, "0", 2);
             else
                 memcpy(enabled, data, len + 1);
             free(data);
         } else
-            memcpy(enabled, "1", 2);
+            memcpy(enabled, "0", 2);
 
         /* enforce persist.sys.root_access on non-eng builds for apps */
         if (strcmp("eng", build_type) != 0 &&
@@ -679,12 +680,6 @@ int su_main(int argc, char *argv[], int need_client) {
         unsetenv(*cp);
         cp++;
     }
-
-    /*
-     * set LD_LIBRARY_PATH if the linker has wiped out it due to we're suid.
-     * This occurs on Android 4.0+
-     */
-    setenv("LD_LIBRARY_PATH", "/vendor/lib:/system/lib", 0);
 
     LOGD("su invoked.");
 
