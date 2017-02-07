@@ -168,11 +168,10 @@ public class PolicyFragmentInternal extends ListContentFragmentInternal {
                 switch (which) {
                 case 0:
                     if(permissionChange.equalsIgnoreCase(
-                     getResources().getText(R.string.allow).toString())){
-                 up.setPolicy(UidPolicy.ALLOW);
-                    }
-                    else{
-                 up.setPolicy(UidPolicy.DENY);
+                        getResources().getText(R.string.su_allow).toString())){
+                        up.setPolicy(UidPolicy.ALLOW);
+                    } else {
+                        up.setPolicy(UidPolicy.DENY);
                     }
                     SuDatabaseHelper.setPolicy(getActivity(), up);
                     //update the adapters
